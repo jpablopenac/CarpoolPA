@@ -31,7 +31,10 @@
           </td>
           <td><input type="checkbox" name="{{ d }}_flex_ida" {% if p and p.flex_ida %}checked{% endif %}></td>
           <td><input type="checkbox" name="{{ d }}_flex_vuelta" {% if p and p.flex_vuelta %}checked{% endif %}></td>
-          <td><input type="checkbox" name="{{ d }}_can_drive" {% if p and p.can_drive %}checked{% endif %}></td>
+          <td>
+            {% set disabled = (not p or not p.ida_slot or not p.vuelta_slot) %}
+            <input type="checkbox" name="{{ d }}_can_drive" {% if p and p.can_drive and not disabled %}checked{% endif %} {% if disabled %}disabled{% endif %}>
+          </td>
         </tr>
       {% endfor %}
     </tbody>

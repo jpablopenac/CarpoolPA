@@ -68,12 +68,16 @@ def usuario():
     if request.method == "POST":
         # Global volunteer flag
         current_user.volunteer_second_day = bool(request.form.get("global_volunteer"))
+        any_can_drive = False
         for d in DAYS:
             ida = request.form.get(f"{d}_ida") or None
             vuelta = request.form.get(f"{d}_vuelta") or None
             flex_ida = bool(request.form.get(f"{d}_flex_ida"))
             flex_vuelta = bool(request.form.get(f"{d}_flex_vuelta"))
             can_drive = bool(request.form.get(f"{d}_can_drive"))
+            can_drive_allowed = bool(ida and vuelta)
+            if not can_drive_allowed:
+                can_drive = False
 
             pref = Preference.query.filter_by(user_id=current_user.id, week_id=week.id, day=d).first()
             if not pref:
@@ -84,6 +88,11 @@ def usuario():
             pref.flex_ida = flex_ida
             pref.flex_vuelta = flex_vuelta
             pref.can_drive = can_drive
+            any_can_drive = any_can_drive or can_drive
+        if not any_can_drive:
+            db.session.rollback()
+            flash("Debes marcar al menos un día en que puedes conducir.", "danger")
+            return redirect(url_for("main.usuario"))
         db.session.commit()
         flash("Preferencias guardadas", "success")
         return redirect(url_for("main.usuario"))

@@ -126,10 +126,9 @@ def modelo_conductores(conductores: List[dict], demanda_opt: Dict[int, Dict[Turn
             prob += pl.lpSum(x[(c["id"], (d, s, "ida"))] for s in IDA_SLOTS) \
                 == pl.lpSum(x[(c["id"], (d, s, "vuelta"))] for s in VUELTA_SLOTS)
 
-    # 3. Manejo obligatorio >=1 día completo (aplica solo a quienes pueden conducir al menos un día)
+    # 3. Manejo obligatorio >=1 día completo (todos deben conducir al menos un día)
     for c in conductores:
-        if any(c["m"].get((d, s, "ida"), 0) for d in DAYS for s in IDA_SLOTS):
-            prob += pl.lpSum(x[(c["id"], (d, s, "ida"))] for d in DAYS for s in IDA_SLOTS) >= 1
+        prob += pl.lpSum(x[(c["id"], (d, s, "ida"))] for d in DAYS for s in IDA_SLOTS) >= 1
 
     # 4. Segundo día voluntario
     for c in conductores:

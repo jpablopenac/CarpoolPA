@@ -25,18 +25,19 @@ def build_usuarios_from_db(week_id: int) -> List[dict]:
             if p and p.ida_slot:
                 demanda[(d, p.ida_slot, "ida")] = 1
                 if p.flex_ida:
-                    # Only adjacent slots around chosen slot
+                    # For IDA: allow only previous slot (earlier), not same/later
                     idx = IDA_SLOTS.index(p.ida_slot)
-                    for j in (idx - 1, idx, idx + 1):
-                        if 0 <= j < len(IDA_SLOTS):
-                            flex[(d, IDA_SLOTS[j], "ida")] = 1
+                    j = idx - 1
+                    if 0 <= j < len(IDA_SLOTS):
+                        flex[(d, IDA_SLOTS[j], "ida")] = 1
             if p and p.vuelta_slot:
                 demanda[(d, p.vuelta_slot, "vuelta")] = 1
                 if p.flex_vuelta:
+                    # For VUELTA: allow only next slot (later), not same/earlier
                     idx = VUELTA_SLOTS.index(p.vuelta_slot)
-                    for j in (idx - 1, idx, idx + 1):
-                        if 0 <= j < len(VUELTA_SLOTS):
-                            flex[(d, VUELTA_SLOTS[j], "vuelta")] = 1
+                    j = idx + 1
+                    if 0 <= j < len(VUELTA_SLOTS):
+                        flex[(d, VUELTA_SLOTS[j], "vuelta")] = 1
         usuarios.append({
             "id": u.id,
             "demanda_original": demanda,
