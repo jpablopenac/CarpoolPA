@@ -9,7 +9,7 @@ app = create_app()
 
 with app.app_context():
     today = date.today()
-    mon = today - timedelta(days=today.weekday()) + timedelta(days=7)  # next week Monday
+    mon = today - timedelta(days=today.weekday())  # semana actual
     week = get_or_create_week(mon)
 
     usuarios = build_usuarios_from_db(week.id)
@@ -22,8 +22,8 @@ with app.app_context():
         if s1 == "Optimal" and s2 == "Optimal":
             pasajeros = fill_pasajeros(y, x)
             persist_assignments(week.id, y, x, pasajeros)
-            print("OK: optimization done for next week", mon)
+            print("OK: optimization done for current week", mon)
         else:
             print("Optimization not optimal, skipping persist")
     else:
-        print("No users/preferences for next week", mon)
+        print("No users/preferences for current week", mon)

@@ -20,11 +20,9 @@ def next_week_monday(dt: date) -> date:
 @bp.route("/")
 @login_required
 def index():
-    # Show current week and next week grids
+    # Horario Actual (solo semana actual)
     cur_mon = monday_of_week(date.today())
-    next_mon = next_week_monday(date.today())
     cur_week = get_or_create_week(cur_mon)
-    next_week = get_or_create_week(next_mon)
     # Build assignment grids for all users
     def build_grid(week_id: int):
         grid_ida = {d: {s: [] for s in IDA_SLOTS} for d in DAYS}
@@ -41,8 +39,7 @@ def index():
                 grid_vuelta[p.day][p.assigned_vuelta_slot].append(label)
         return grid_ida, grid_vuelta
 
-    grid_cur_ida, grid_cur_vuelta = build_grid(cur_week.id)
-    grid_next_ida, grid_next_vuelta = build_grid(next_week.id)
+    grid_ida, grid_vuelta = build_grid(cur_week.id)
 
     return render_template(
         "index.html",
@@ -50,11 +47,8 @@ def index():
         ida=IDA_SLOTS,
         vuelta=VUELTA_SLOTS,
         cur_week=cur_week,
-        next_week=next_week,
-        grid_cur_ida=grid_cur_ida,
-        grid_cur_vuelta=grid_cur_vuelta,
-        grid_next_ida=grid_next_ida,
-        grid_next_vuelta=grid_next_vuelta,
+        grid_ida=grid_ida,
+        grid_vuelta=grid_vuelta,
     )
 
 
@@ -102,18 +96,14 @@ def usuario():
     return render_template("usuario.html", days=DAYS, ida=IDA_SLOTS, vuelta=VUELTA_SLOTS, prefs=prefs)
 
 
-@bp.route("/optimize/<when>")
+@bp.route("/optimize")
 @login_required
-def optimize_when(when: str):
+def optimize_when():
     if not current_user.is_admin:
         flash("Solo admin", "danger")
         return redirect(url_for("main.index"))
 
-    if when not in ("current", "next"):
-        flash("Parámetro inválido", "warning")
-        return redirect(url_for("main.index"))
-
-    mon = monday_of_week(date.today()) if when == "current" else next_week_monday(date.today())
+    mon = monday_of_week(date.today())
     week = get_or_create_week(mon)
 
     usuarios = build_usuarios_from_db(week.id)

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from datetime import date, timedelta
 from .models import db, User, Preference, DAYS, IDA_SLOTS, VUELTA_SLOTS, Week
-from .main import monday_of_week, next_week_monday
+from .main import monday_of_week
 
 bp = Blueprint("admin", __name__)
 
@@ -35,11 +35,10 @@ def delete_user(user_id: int):
 @bp.post("/cleanup_weeks")
 @login_required
 def cleanup_weeks():
-    # Keep only current and next week; delete others to free DB
+    # Mantener solo la semana actual
     today = date.today()
     cur_mon = today - timedelta(days=today.weekday())
-    next_mon = cur_mon + timedelta(days=7)
-    keep = {cur_mon, next_mon}
+    keep = {cur_mon}
     to_delete = Week.query.filter(~Week.start_date.in_(keep)).all()
     cnt = 0
     for w in to_delete:
@@ -56,8 +55,7 @@ def edit_user(user_id: int):
     if not current_user.is_admin:
         return redirect(url_for("main.index"))
     u = User.query.get_or_404(user_id)
-    when = request.args.get("when", "current")
-    mon = monday_of_week(date.today()) if when == "current" else next_week_monday(date.today())
+    mon = monday_of_week(date.today())
     week = Week.query.filter_by(start_date=mon).first()
     if not week:
         week = Week(start_date=mon)
@@ -84,4 +82,4 @@ def edit_user(user_id: int):
         flash("Preferencias actualizadas", "success")
         return redirect(url_for("admin.dashboard"))
     prefs = {p.day: p for p in Preference.query.filter_by(user_id=u.id, week_id=week.id).all()}
-    return render_template("admin_edit_user.html", user=u, days=DAYS, ida=IDA_SLOTS, vuelta=VUELTA_SLOTS, prefs=prefs, when=when)
+    return render_template("admin_edit_user.html", user=u, days=DAYS, ida=IDA_SLOTS, vuelta=VUELTA_SLOTS, prefs=prefs, when="current")
