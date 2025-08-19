@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin</h2>
+<div class="mb-3">
+  <a class="btn btn-outline-primary me-2" href="/optimize/current">Optimizar semana actual</a>
+  <a class="btn btn-outline-secondary" href="/optimize/next">Optimizar próxima semana</a>
+  </div>
+<table class="table table-striped">
+  <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Acciones</th></tr></thead>
+  <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-primary" href="/admin/user/{{ u.id }}/edit?when=current">Editar (actual)</a>
+          <a class="btn btn-sm btn-outline-secondary" href="/admin/user/{{ u.id }}/edit?when=next">Editar (próxima)</a>
+          <form method="post" action="/admin/user/{{ u.id }}/delete" onsubmit="return confirm('Eliminar?')">
+            <button class="btn btn-sm btn-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Semanas</h3>
+<form method="post" action="/admin/cleanup_weeks" onsubmit="return confirm('¿Eliminar semanas antiguas?')">
+  <button class="btn btn-sm btn-warning">Limpiar semanas antiguas</button>
+  <small class="text-muted ms-2">Se conservarán la actual y la siguiente</small>
+  </form>
+<ul>
+  {% for w in weeks %}
+    <li>{{ w.start_date }}</li>
+  {% endfor %}
+  </ul>
+{% endblock %}

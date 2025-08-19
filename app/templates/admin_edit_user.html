@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Editar usuario: {{ user.name }} ({{ when }})</h2>
+<form method="post">
+  <div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" id="global_volunteer" name="global_volunteer" {% if user.volunteer_second_day %}checked{% endif %}>
+    <label class="form-check-label" for="global_volunteer">Voluntario para conducir un segundo día</label>
+  </div>
+  <table class="table">
+    <thead><tr><th>Día</th><th>Entrada</th><th>Salida</th><th>Flex ida</th><th>Flex vuelta</th><th>¿Puede conducir?</th></tr></thead>
+    <tbody>
+      {% for d in days %}
+        {% set p = prefs.get(d) %}
+        <tr>
+          <td>{{ d|capitalize }}</td>
+          <td>
+            <select class="form-select" name="{{ d }}_ida">
+              <option value="">--</option>
+              {% for s in ida %}
+                <option value="{{ s }}" {% if p and p.ida_slot==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <select class="form-select" name="{{ d }}_vuelta">
+              <option value="">--</option>
+              {% for s in vuelta %}
+                <option value="{{ s }}" {% if p and p.vuelta_slot==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input type="checkbox" name="{{ d }}_flex_ida" {% if p and p.flex_ida %}checked{% endif %}></td>
+          <td><input type="checkbox" name="{{ d }}_flex_vuelta" {% if p and p.flex_vuelta %}checked{% endif %}></td>
+          <td><input type="checkbox" name="{{ d }}_can_drive" {% if p and p.can_drive %}checked{% endif %}></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button class="btn btn-primary">Guardar</button>
+</form>
+{% endblock %}

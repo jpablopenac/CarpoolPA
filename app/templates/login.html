@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Login</h2>
+<form method="post">
+  <div class="mb-3"><label class="form-label">Correo</label><input class="form-control" type="email" name="email" required></div>
+  <div class="mb-3"><label class="form-label">Contraseña</label><input class="form-control" type="password" name="password" required></div>
+  <button class="btn btn-primary">Entrar</button>
+  <a class="btn btn-link" href="/register">Crear cuenta</a>
+</form>
+<hr>
+<p class="text-muted">Para crear un admin rápidamente, registra un usuario y cambia is_admin en la base de datos.</p>
+{% endblock %}
