@@ -1,3 +1,4 @@
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from datetime import date, timedelta
@@ -62,6 +63,11 @@ def edit_user(user_id: int):
         db.session.add(week)
         db.session.commit()
     if request.method == "POST":
+        # Actualizar nombre del usuario
+        user_name = request.form.get("user_name", "").strip()
+        if user_name:
+            u.name = user_name
+        
         u.volunteer_second_day = bool(request.form.get("global_volunteer"))
         for d in DAYS:
             ida = request.form.get(f"{d}_ida") or None
@@ -83,3 +89,26 @@ def edit_user(user_id: int):
         return redirect(url_for("admin.dashboard"))
     prefs = {p.day: p for p in Preference.query.filter_by(user_id=u.id, week_id=week.id).all()}
     return render_template("admin_edit_user.html", user=u, days=DAYS, ida=IDA_SLOTS, vuelta=VUELTA_SLOTS, prefs=prefs, when="current")
+
+
+@bp.post("/create_test_users")
+@login_required
+def create_test_users():
+    if not current_user.is_admin:
+        return redirect(url_for("main.index"))
+    # Crear 10 usuarios de prueba
+    created = 0
+    for i in range(1, 11):
+        email = f"test{i}@example.com"
+        name = f"Test User {i}"
+        if not User.query.filter_by(email=email).first():
+            user = User(name=name, email=email)
+            user.set_password("test1234")
+            db.session.add(user)
+            created += 1
+    db.session.commit()
+    if created:
+        flash(f"{created} usuario(s) de prueba creados.", "success")
+    else:
+        flash("Los usuarios de prueba ya existen.", "info")
+    return redirect(url_for("admin.dashboard"))

@@ -29,14 +29,29 @@ def index():
         grid_vuelta = {d: {s: [] for s in VUELTA_SLOTS} for d in DAYS}
         prefs = Preference.query.filter_by(week_id=week_id).all()
         users = {u.id: u for u in User.query.all()}
+        
         for p in prefs:
-            name = users.get(p.user_id).name if users.get(p.user_id) else str(p.user_id)
+            user = users.get(p.user_id)
+            name = user.name if user else str(p.user_id)
+            
             if p.assigned_ida_slot:
-                label = f"{name} ({p.role_ida or '-'})"
+                if p.role_ida == "conductor":
+                    label = f"🚗 {name}"
+                elif p.role_ida == "pasajero":
+                    label = f"👤 {name}"
+                else:
+                    label = f"❓ {name}"
                 grid_ida[p.day][p.assigned_ida_slot].append(label)
+                
             if p.assigned_vuelta_slot:
-                label = f"{name} ({p.role_vuelta or '-'})"
+                if p.role_vuelta == "conductor":
+                    label = f"🚗 {name}"
+                elif p.role_vuelta == "pasajero":
+                    label = f"👤 {name}"
+                else:
+                    label = f"❓ {name}"
                 grid_vuelta[p.day][p.assigned_vuelta_slot].append(label)
+                
         return grid_ida, grid_vuelta
 
     grid_ida, grid_vuelta = build_grid(cur_week.id)

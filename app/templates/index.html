@@ -1,54 +1,156 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Horario Actual</h2>
-<p>Semana que inicia el lunes: {{ cur_week.start_date }}</p>
+<h2>🚗 Horario Semanal de Carpool</h2>
+<p class="text-muted">Semana que inicia el lunes: <strong>{{ cur_week.start_date }}</strong></p>
+
+<style>
+.conductor-badge {
+  background-color: #198754;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  margin: 0.1rem;
+  display: inline-block;
+}
+.pasajero-badge {
+  background-color: #0d6efd;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  margin: 0.1rem;
+  display: inline-block;
+}
+.schedule-cell {
+  min-height: 60px;
+  vertical-align: top;
+  padding: 0.5rem !important;
+  text-align: center;
+}
+.schedule-table {
+  border: 2px solid #dee2e6;
+}
+.schedule-table th {
+  background-color: #f8f9fa;
+  text-align: center;
+  font-weight: 600;
+  padding: 0.75rem 0.5rem;
+}
+.day-header {
+  background-color: #e9ecef;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.75rem 0.5rem;
+}
+@media (max-width: 768px) {
+  .schedule-table {
+    font-size: 0.8rem;
+  }
+  .conductor-badge, .pasajero-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+</style>
 
 <div class="row">
-  <div class="col-12 col-lg-6">
-    <h4>Ida</h4>
-    <table class="table table-sm">
-      <thead><tr><th>Día</th>{% for s in ida %}<th>{{ s }}</th>{% endfor %}</tr></thead>
-      <tbody>
-        {% for d in days %}
-          <tr>
-            <td>{{ d|capitalize }}</td>
-            {% for s in ida %}
-              <td>
-                {% for label in grid_ida[d][s] %}
-                  <div>{{ label }}</div>
+  <!-- HORARIOS DE IDA - ARRIBA -->
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">🌅 Horarios de Ida</h4>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm schedule-table mb-0">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Horario</th>
+                {% for d in days %}
+                  <th class="text-center">{{ d|capitalize }}</th>
                 {% endfor %}
-              </td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in ida %}
+                <tr>
+                  <td class="day-header text-center">{{ s }}</td>
+                  {% for d in days %}
+                    <td class="schedule-cell">
+                      {% for label in grid_ida[d][s] %}
+                        {% if '🚗' in label %}
+                          <span class="conductor-badge">{{ label }}</span>
+                        {% else %}
+                          <span class="pasajero-badge">{{ label }}</span>
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-12 col-lg-6">
-    <h4>Vuelta</h4>
-    <table class="table table-sm">
-      <thead><tr><th>Día</th>{% for s in vuelta %}<th>{{ s }}</th>{% endfor %}</tr></thead>
-      <tbody>
-        {% for d in days %}
-          <tr>
-            <td>{{ d|capitalize }}</td>
-            {% for s in vuelta %}
-              <td>
-                {% for label in grid_vuelta[d][s] %}
-                  <div>{{ label }}</div>
+  
+  <!-- HORARIOS DE VUELTA - ABAJO -->
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">🌆 Horarios de Vuelta</h4>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm schedule-table mb-0">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Horario</th>
+                {% for d in days %}
+                  <th class="text-center">{{ d|capitalize }}</th>
                 {% endfor %}
-              </td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in vuelta %}
+                <tr>
+                  <td class="day-header text-center">{{ s }}</td>
+                  {% for d in days %}
+                    <td class="schedule-cell">
+                      {% for label in grid_vuelta[d][s] %}
+                        {% if '🚗' in label %}
+                          <span class="conductor-badge">{{ label }}</span>
+                        {% else %}
+                          <span class="pasajero-badge">{{ label }}</span>
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-3">
+  <div class="col-12">
+    <div class="alert alert-info">
+      <h6>📋 Leyenda:</h6>
+      <span class="conductor-badge me-2">🚗 Conductor</span>
+      <span class="pasajero-badge">👤 Pasajero</span>
+    </div>
   </div>
 </div>
 
 {% if current_user.is_admin %}
   <div class="mt-3">
-    <a class="btn btn-outline-primary" href="/optimize">Optimizar horario actual</a>
+    <a class="btn btn-outline-primary" href="/optimize">🔄 Optimizar horario actual</a>
   </div>
 {% endif %}
 {% endblock %}

@@ -1,21 +1,55 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Mis preferencias (semana actual)</h2>
-<form method="post">
-  <div class="form-check form-switch mb-3">
-    <input class="form-check-input" type="checkbox" id="global_volunteer" name="global_volunteer" {% if current_user.volunteer_second_day %}checked{% endif %}>
-    <label class="form-check-label" for="global_volunteer">Voluntario para conducir un segundo día</label>
-  </div>
-  <table class="table">
-    <thead><tr><th>Día</th><th>Entrada</th><th>Salida</th><th>Flex ida</th><th>Flex vuelta</th><th>¿Puede conducir?</th></tr></thead>
-    <tbody>
+<h2>🔧 Mis Preferencias</h2>
+<p class="text-muted">Configura tus horarios y disponibilidad para la semana actual</p>
+
+<style>
+.preference-table {
+  border: 2px solid #dee2e6;
+}
+.preference-table th {
+  background-color: #f8f9fa;
+  text-align: center;
+  font-weight: 600;
+}
+.day-cell {
+  background-color: #e9ecef;
+  font-weight: 600;
+  vertical-align: middle;
+}
+</style>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="global_volunteer" name="global_volunteer" {% if current_user.volunteer_second_day %}checked{% endif %}>
+        <label class="form-check-label" for="global_volunteer">
+          <strong>🚗 Voluntario para conducir un segundo día</strong>
+          <small class="text-muted d-block">Marca esta opción si puedes conducir más de un día por semana</small>
+        </label>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table preference-table">
+          <thead>
+            <tr>
+              <th style="width: 120px;">Día</th>
+              <th>🌅 Entrada</th>
+              <th>🌆 Salida</th>
+              <th>🔄 Flex ida</th>
+              <th>🔄 Flex vuelta</th>
+              <th>🚗 ¿Puede conducir?</th>
+            </tr>
+          </thead>
+          <tbody>
     {% for d in days %}
       {% set p = prefs.get(d) %}
       <tr>
-        <td>{{ d|capitalize }}</td>
+        <td class="day-cell">{{ d|capitalize }}</td>
         <td>
           <select class="form-select" name="{{ d }}_ida">
-            <option value="">--</option>
+            <option value="">-- Seleccionar --</option>
             {% for s in ida %}
               <option value="{{ s }}" {% if p and p.ida_slot==s %}selected{% endif %}>{{ s }}</option>
             {% endfor %}
@@ -23,24 +57,46 @@
         </td>
         <td>
           <select class="form-select" name="{{ d }}_vuelta">
-            <option value="">--</option>
+            <option value="">-- Seleccionar --</option>
             {% for s in vuelta %}
               <option value="{{ s }}" {% if p and p.vuelta_slot==s %}selected{% endif %}>{{ s }}</option>
             {% endfor %}
           </select>
         </td>
-        <td><input type="checkbox" name="{{ d }}_flex_ida" {% if p and p.flex_ida %}checked{% endif %}></td>
-        <td><input type="checkbox" name="{{ d }}_flex_vuelta" {% if p and p.flex_vuelta %}checked{% endif %}></td>
-        <td>
+        <td class="text-center">
+          <input type="checkbox" class="form-check-input" name="{{ d }}_flex_ida" {% if p and p.flex_ida %}checked{% endif %}>
+          <small class="text-muted d-block">Horario flexible</small>
+        </td>
+        <td class="text-center">
+          <input type="checkbox" class="form-check-input" name="{{ d }}_flex_vuelta" {% if p and p.flex_vuelta %}checked{% endif %}>
+          <small class="text-muted d-block">Horario flexible</small>
+        </td>
+        <td class="text-center">
           {% set disabled = (not p or not p.ida_slot or not p.vuelta_slot) %}
-          <input type="checkbox" name="{{ d }}_can_drive" {% if p and p.can_drive and not disabled %}checked{% endif %} {% if disabled %}disabled{% endif %}>
+          <input type="checkbox" class="form-check-input" name="{{ d }}_can_drive" {% if p and p.can_drive and not disabled %}checked{% endif %} {% if disabled %}disabled{% endif %}>
+          <small class="text-muted d-block">{% if disabled %}Selecciona entrada y salida{% else %}Disponible para conducir{% endif %}</small>
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
-  <button class="btn btn-primary">Guardar</button>
-</form>
+        </tbody>
+        </table>
+      </div>
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+        <button class="btn btn-primary btn-lg">💾 Guardar Preferencias</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="alert alert-info mt-3">
+  <h6>💡 Consejos:</h6>
+  <ul class="mb-0">
+    <li><strong>Flexibilidad:</strong> Marca "Flex" si puedes aceptar un horario adyacente al seleccionado</li>
+    <li><strong>Conducir:</strong> Debes seleccionar entrada Y salida para poder marcarte como conductor</li>
+    <li><strong>Segundo día:</strong> Si marcas "voluntario", podrás conducir más de un día por semana</li>
+  </ul>
+</div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const daySet = new Set();

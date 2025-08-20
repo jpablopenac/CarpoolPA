@@ -3,7 +3,10 @@
 <h2>Admin</h2>
 <div class="mb-3">
   <a class="btn btn-outline-primary" href="/optimize">Optimizar horario actual</a>
-  </div>
+  <form method="post" action="/admin/create_test_users" style="display:inline">
+    <button class="btn btn-outline-success" type="submit">Crear usuarios de prueba</button>
+  </form>
+</div>
 <table class="table table-striped">
   <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Acciones</th></tr></thead>
   <tbody>
